@@ -1,0 +1,36 @@
+--- libtpcimgio/Makefile.orig	2007-09-10 06:53:15.000000000 +0200
++++ libtpcimgio/Makefile	2008-01-20 11:55:29.769905722 +0100
+@@ -63,8 +63,8 @@
+ 		  imgfile.c img_ana.c img_e63.c img_e7.c \
+                   imgunit.c imgmax.c imgdecay.c vol.c img.c \
+ 		  sifio.c sif.c weight.c libtpcimgiov.c
+-OBJECTS 	= ${SOURCES:.c=.o}
+-LIBARCHIVE	= ${LIBRARY}.a
++OBJECTS 	= ${SOURCES:.c=.lo}
++LIBARCHIVE	= ${LIBRARY}.la
+ DOXYGEN		= doxygen
+ CC		= gcc
+ CFLAGS 		= -std=gnu99 -s -Wall ${ANSI} -O ${INCLUDE}
+@@ -89,9 +89,12 @@
+ # ------------- Compilation: --------------------------------------------------#
+ compile: ${LIBARCHIVE} ${LIBEXEC}
+ 
++%.lo: %.c
++	libtool --tag=CC --mode=compile $(CC) $(CFLAGS) -c $<
++
+ # Compile library
+ ${LIBARCHIVE}: ${OBJECTS}
+-	${AR} -rvs ${LIBARCHIVE} ${OBJECTS}
++	libtool --tag=CC --mode=link $(CC) $(LDFLAGS) $(CFLAGS) -o $@ $^ -ltpcmisc -rpath $(PET_LIB)
+ 
+ # Compile executable
+ ${LIBEXEC}: ${LIBARCHIVE} ${LIBRARY}.c
+@@ -115,7 +118,7 @@
+ install: libversion libinstall execinstall
+ 
+ libinstall: ${LIBARCHIVE}
+-	${ADDDATE} -i=${LIBRARY}.version -o=${PET_LIB} -nodate ${LIBARCHIVE}
++	libtool --tag=CC --mode=install install $(LIBARCHIVE) $(DESTDIR)$(PET_LIB)
+ 
+ execinstall: ${LIBEXEC}
+ 	${ADDDATE} -i=${LIBRARY}.version -o=${PET_BIN} -nodate -copy ${LIBEXEC}
